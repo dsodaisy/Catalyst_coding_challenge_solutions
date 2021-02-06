@@ -7,6 +7,7 @@ data, the script must be able to process this file appropriately.*/
 
 //obtaining and storing CLI arguments passed to the php script
 require_once 'PHPExcel/Classes/PHPExcel.php';
+require_once 'Console/Table.php';
 //require_once(BASE_PATH . '/PHPExcel/Classes/PHPExcel.php');
 $shortopts="";
 $shortopts.="u:";//Required value - username
@@ -69,12 +70,39 @@ else //if all the parameters are entered as expected, proceed with validating th
 			$cell_value=trim(strtolower($worksheet->getCellByColumnAndRow($col,$row)->getValue()));
 			if($col!=2)
 				$cell_value=ucfirst($cell_value);
+			else
+			{
+				if(!filter_var($cell_value,FILTER_VALIDATE_EMAIL))
+					array_push($rowdata,'NULL');
+			}
 			array_push($rowdata,$cell_value);
 		}
 		array_push($all_Rows,$rowdata);
 	}
 	print_r($all_Rows);//*****
-	
+	if(isset($options['dry_run']))//if dry_run is set
+	{
+		echo "Since the 'dry_run' flag is set, the data has not been entered into the MySQL table.\nBelow is a preview of the data (first three columns) that would be entered if dry_run was not enabled.\n";
+		$table=new Console_Table();
+		$table->setHeaders(array('Name','Surname','Email'));
+		$j=0;
+		for($i=0;$i<count($all_Rows);$i++)//iterate through $all_Rows
+		{
+			if($all_Rows[$i][2]=='NULL')
+			{
+				$table->addRow(array($all_Rows[$i][0],$all_Rows[$i][1],$all_Rows[$i][3],"This email will not be entered into the DB as the format is invalid!"));
+			}
+			else
+			{
+				$table->addRow(array($all_Rows[$i][0],$all_Rows[$i][1],$all_Rows[$i][2]));
+			}
+		}
+		echo $table->getTable();
+	}
+	else//if dry_run is not set, need to insert into table
+	{
+		
+	}
 }
 ?>
 
