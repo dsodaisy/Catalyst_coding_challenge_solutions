@@ -33,6 +33,11 @@ else //if all the parameters are entered as expected, proceed with validating th
 	$lastRow = $worksheet->getHighestRow(); //to get the last row in the sheet
 	$all_Rows=array();
 	$one_element=0; //flag to indicate if at least 1 record is successfully read from the csv file
+	if((trim(strtolower($worksheet->getCellByColumnAndRow(0,1)->getValue()))!='name')||(trim(strtolower($worksheet->getCellByColumnAndRow(1,1)->getValue()))!='surname')||(trim(strtolower($worksheet->getCellByColumnAndRow(2,1)->getValue()))!='email'))
+	{
+		echo "Please ensure that the csv file provided has the header (first row) titled exactly as 'name','surname','email' (with the same order).\nPlease contact the system administrator should you require further clarification.";
+		exit();
+	}
 	for($row=2;$row<($lastRow+1);$row++)//iterate through each row
 	{
 		$rowdata=array();
